@@ -44,8 +44,6 @@ deleteContact = contactId => {
 };
 
     render(){
-        const {contacts, filter} = this.state;
-
         const filtredContacts = this.getFiltredContacts();
 
         return (
@@ -55,7 +53,7 @@ deleteContact = contactId => {
 
                 <h2 className={s.phonebookTitle}>Contacts</h2>
                 <div className={s.contact}>
-                    <Filter value={filter} onChange={this.changeFilter}/>
+                    <Filter value={this.filter} onChange={this.changeFilter}/>
                     <ContactList options={filtredContacts} onDeleteContact={this.deleteContact}/>
                 </div>
             </div>

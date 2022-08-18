@@ -1,10 +1,20 @@
 import { Component } from "react";
 import shortid from "shortid";
+import PropTypes from 'prop-types';
 
 import s from "./contactForm.module.css";
 
 
 class ContactForm extends Component {
+    
+    static defaultProps = {
+        onsubmit: () => {}
+    }
+
+    static propTypes = {
+        onSubmit: PropTypes.func,
+    }
+    
     state = {
         id: '',
         name: '',

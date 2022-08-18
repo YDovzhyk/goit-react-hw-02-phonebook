@@ -1,60 +1,79 @@
 import { Component } from "react";
+import PropTypes from 'prop-types';
 
-import FeedbackOptions from "./FeedbackForm/FeedbackOptions/FeedbackOptions";
-import Statistics from "./FeedbackForm/Statistics/Statistics";
-import SectionTitle from "./FeedbackForm/SectionTitle/SectionTitle";
-import NotificationMessage from "./FeedbackForm/NotificationMessage/NotificationMessage";
+import ContactForm from "./Phonebook/ContactForm/ContactForm";
+import Filter from "./Phonebook/Filter/Filter";
+import ContactList from "./Phonebook/ContactList/ContactList";
 
-import s from "./FeedbackForm/feedbackForm.module.css"
-
+import s from "../components/Phonebook/ContactList/contactList.module.css"
 
 export class App extends Component {
     state = {
-        good: 0,
-        neutral: 0,
-        bad: 0
-    }
-
-    countTotalFeedback() {
-        const {good, neutral, bad} = this.state;
-        return good + neutral + bad;
-    }
-
-    countPositiveFeedbackPercentage(propertyName) {
-        const total = this.countTotalFeedback();
-        if(!total) {
-            return 0;
+        contacts: [],
+        filter: '',
         }
-        const value = this.state[propertyName];
-        const result = (value / total) * 100;
-        return Number(result.toFixed(2));
-    }
 
-    onLeaveFeedback = propertyName => {
-        this.setState(prevState => ({
-            [propertyName]: prevState[propertyName] + 1,
-        }));
+// Записуємо нову дату в contacts (зберігаємо минулий стан)
+formSubmitHandler = data => {
+    if(this.state.contacts.find((element) => element.data.name === data.name)) {
+        return alert (`${data.name} is alredy in contact`);
     }
+    const listContacts = {
+        data,
+    };
+this.setState(prevState => ({
+    contacts: [listContacts, ...prevState.contacts],
+}));
+};
+
+changeFilter = e => {
+    this.setState({filter: e.currentTarget.value});
+};
+
+getFiltredContacts = () => {
+    const {filter, contacts} = this.state;
+    const normalizedFilter = filter.toLowerCase();
+    return contacts.filter((element) =>
+    element.data.name.toLowerCase().includes(normalizedFilter));
+}
+
+deleteContact = contactId => {
+    this.setState(prevState => ({
+        contacts: prevState.contacts.filter((element) => element.data.id !== contactId),
+    }));
+};
 
     render(){
-        const {good, neutral, bad} = this.state;
+        const {contacts, filter} = this.state;
 
-        const total = this.countTotalFeedback();
-
-        const goodPercent = this.countPositiveFeedbackPercentage("good");
+        const filtredContacts = this.getFiltredContacts();
 
         return (
-            <div className={s.feedbackForm}>
-                <SectionTitle title="Please leave feedback">
-                    <FeedbackOptions options={this.state} onLeaveFeedback={this.onLeaveFeedback} />
-                </SectionTitle>
-                <SectionTitle title="Statistics">
-                    {total > 0 && <Statistics good={good} neutral={neutral} bad={bad} total={total} positivePercentage={goodPercent}></Statistics>}
-                    {total === 0 && <NotificationMessage title="There is no feedback"></NotificationMessage>}
-                </SectionTitle>
+            <div className={s.phonebook}>
+                <h2 className={s.phonebookTitle}>Phonebook</h2>
+                <ContactForm onSubmit={this.formSubmitHandler} />
+
+                <h2 className={s.phonebookTitle}>Contacts</h2>
+                <div className={s.contact}>
+                    <Filter value={filter} onChange={this.changeFilter}/>
+                    <ContactList options={filtredContacts} onDeleteContact={this.deleteContact}/>
+                </div>
             </div>
         )
     }
 }
 
 export default App;
+
+App.defaultProps = {
+    data: {},
+}
+
+App.propTypes = {
+    data: PropTypes.shape({
+        id: PropTypes.string,
+        name: PropTypes.string,
+        number: PropTypes.string,
+        licence: PropTypes.bool,
+        }),
+}
